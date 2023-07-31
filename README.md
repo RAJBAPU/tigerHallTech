@@ -142,7 +142,7 @@ Response of being sighted less than 5Km radius:
     "model": null
 }
 
-4./tigers/sightings?tigerId= : GET request to get details of a particular tiger
+4./tigers/sightings?tigerId= : GET request to get details of a particular tiger. In image fe will get the firebase url of the image but without the base url
 
 
 Response:
@@ -165,6 +165,14 @@ Response:
         ],
         "total": 6
     }
+}
+
+{
+
+1.Kindly update ur firebase credentials in firebase/firebase_json to store and get image
+2. Migration script is provided. Please run that to migrate the data base
+Pre-Reqs: Beego and Golang has to be installed
+
 }
 
 
