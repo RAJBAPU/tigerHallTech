@@ -6,10 +6,12 @@ The server receives the request, validates the credentials, adds the user to the
 Request: 
 
 {
+
     "name":"Ayush Raj",
     "email": "ayursaj@gmail.com",
     "password": "miqcnqke",
     "passwordConfirm": "miqcnqke"
+
 
 }
 
