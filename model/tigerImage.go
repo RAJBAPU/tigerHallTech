@@ -18,7 +18,7 @@ type TgTigerImages struct {
 }
 
 func (t *TgTigerImages) TableName() string {
-	return "tg_tiger_images"
+	return "tg_tiger_sighting"
 }
 
 func init() {
