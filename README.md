@@ -112,7 +112,7 @@ SuccessResponse:
   }
 }
 
-3. /tigers/sightings: POST to store tiger sightings
+3. /tigers/sightings: POST to store tiger sightings. Images are stored like the asked size ie 250*200
 Request:
 {
     "tigerId": 1,
