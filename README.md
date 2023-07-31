@@ -17,9 +17,11 @@ Request:
 
 Success Response:
 {
+
     "code": 200,
     "msg": "success",
     "model": null
+    
 }
 
 2. /verifyemail/:verificationCode :
@@ -28,20 +30,25 @@ However, since there is no frontend application, you need to copy the verificati
 Paste the verification code in the URL and make a GET request to the /verifyemail/:verificationCode endpoint to verify the email address.
 Success Response:
 {
+
     "code": 200,
     "msg": "success",
     "model": null
+   
 }
 
 3./login: Once the account has been verified, the user can provide the email and password used in registering for the account and make a POST request to the /login endpoint to sign into the account.
 Request:
 { 
+
     "email": "ayursaj@gmail.com",
     "password": "miqcnqke"
+    
 }
 
 Success Response:
 {
+
     "code": 200,
     "msg": "success",
     "model": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTQ0MjE4MzUsImlhdCI6MTY5MDgyMTgzNSwibmJmIjoxNjkwODIxODM1LCJzdWIiOjIwfQ.vmwj1ttEsyD2Nl3xuA7hk-uGReZmY4RO7jMgv2eHWis"
@@ -50,6 +57,7 @@ Success Response:
 4./me : Here, the user can make a GET request to the /me endpoint with the token received from the server to retrieve his credentials.
 
 {
+
     "code": 200,
     "msg": "success",
     "model": {
@@ -65,6 +73,7 @@ Success Response:
 Request:
 
 {
+
     "name": "baghh",
     "dob": "2021-07-29T21:25:56+05:30",
     "lastSteenTimeStamp": "2023-07-29T21:25:56+05:30",
@@ -77,6 +86,7 @@ Request:
 SuccessResponse:
 
 {
+
     "code": 200,
     "msg": "success",
     "model": null
@@ -97,7 +107,6 @@ SuccessResponse:
           "longitude": -23.006
         }
       }
-   
     ],
     "totalTigers": 6
   }
@@ -119,6 +128,7 @@ Request:
 
 Succes Response:
 {
+
     "code": 200,
     "msg": "success",
     "model": null
@@ -126,6 +136,7 @@ Succes Response:
 
 Response of being sighted less than 5Km radius:
 {
+
     "code": 452,
     "msg": "Tiger was already spotted in range",
     "model": null
@@ -136,6 +147,7 @@ Response of being sighted less than 5Km radius:
 
 Response:
 {
+
     "code": 200,
     "msg": "success",
     "model": {
