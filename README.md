@@ -4,6 +4,7 @@
 The server receives the request, validates the credentials, adds the user to the database, and sends a verification code to the user’s email address.
 
 Request: 
+
 {
     "name":"Ayush Raj",
     "email": "ayursaj@gmail.com",
