@@ -170,8 +170,52 @@ Response:
 {
 
 1.Kindly update ur firebase credentials in firebase/firebase_json to store and get image
-2. Migration script is provided. Please run that to migrate the data base
-Pre-Reqs: Beego and Golang has to be installed
+2.Please Run the below queires in your database for the code to work and modify the credentials as per urs
+``` 
+CREATE TABLE `tg_user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `password` varchar(512)  NULL DEFAULT NULL,
+  `email` varchar(64) NULL DEFAULT NULL,
+  `name` varchar(64) NULL DEFAULT NULL,
+  `verified` bool DEFAULT 0,
+  `verificationCode` varchar(64) NULL DEFAULT NULL,
+  `createdOn` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatedOn` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tg_userId` (`id`),
+  KEY `tg_user_VerificationCode` (`verificationCode`)
+);
+```
+```
+CREATE TABLE `tg_tiger_details` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) NULL DEFAULT NULL,
+  `dob` varchar(64) NULL DEFAULT NULL,
+  `lastSeen` datetime NULL DEFAULT NULL,
+  `longitude` float  NULL DEFAULT NULL,
+  `latitude`  float  NULL DEFAULT NULL,
+  `isDead` bool DEFAULT 0,
+  `createdOn` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatedOn` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tg_tiger_detailsId` (`id`)
+);
+```
+```
+CREATE TABLE `tg_tiger_sighting` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `tigerId` int NULL DEFAULT NULL,
+  `image` varchar(512) NULL DEFAULT NULL,
+  `lastSeen` datetime NULL DEFAULT NULL,
+  `longitude` float  NULL DEFAULT NULL,
+  `latitude`  float  NULL DEFAULT NULL,
+  `createdOn` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatedOn` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tg_tiger_imagesId` (`id`),
+    KEY `tg_tiger_imagestigerId` (`tigerId`)
+);
+```
 
 }
 
