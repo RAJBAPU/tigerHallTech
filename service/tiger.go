@@ -1,9 +1,12 @@
 package service
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"math"
 	"simpl_pr/firebase"
 	models "simpl_pr/model"
@@ -13,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/nfnt/resize"
 	"github.com/spf13/cast"
 )
 
@@ -104,11 +108,12 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 		fmt.Println("Failed to decode Base64 data:", err)
 		return
 	}
+	resizedImageData := resizeImage(imageData, 250, 200)
 	filename := firebase.GenerateUUID()
 
 	filePath := cast.ToString(tigerDetails.Id) + "/" + "tigerImage" + "/" + filename
 
-	tigerImageUrl, err := firebase.UploadToFireBaseAndGetAccessUrl(imageData, "image/jpg", filePath)
+	tigerImageUrl, err := firebase.UploadToFireBaseAndGetAccessUrl(resizedImageData, "image/jpg", filePath)
 	if err != nil {
 		fmt.Println("Error in UploadToFireBaseAndGetAccessUrl: ", err)
 		return
@@ -247,4 +252,22 @@ func sendNotificationEmail(message NotificationMessage) {
 
 func RemoveBaseURLInFirebaseUrl(imageUrl string, baseUrl string) string {
 	return strings.Replace(imageUrl, baseUrl, "", 1)
+}
+
+func resizeImage(data []byte, width, height int) []byte {
+	// Create a new image from the bytes.
+	img, _, _ := image.Decode(bytes.NewReader(data))
+
+	// Resize the image.
+	resizedImg := resize.Resize(250, 200, img, resize.Lanczos3)
+
+	// Encode the resized image to bytes.
+	buf := new(bytes.Buffer)
+	err := jpeg.Encode(buf, resizedImg, nil)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	return buf.Bytes()
 }
