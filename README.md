@@ -216,6 +216,29 @@ CREATE TABLE `tg_tiger_sighting` (
     KEY `tg_tiger_imagestigerId` (`tigerId`)
 );
 ```
+```
+CREATE TABLE `tg_config` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) NOT NULL COMMENT 'Name of the config',
+  `value` varchar(1024) DEFAULT NULL,
+  `description` varchar(256) DEFAULT NULL,
+  `createdOn` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatedOn` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_key` (`key`)
+);
+```
+
+```
+INSERT INTO `sys`.`tg_config` (`key`, `value`) VALUES ('bucket', 'tigerhall-f9032.appspot.com');
+INSERT INTO `sys`.`tg_config` (`key`, `value`) VALUES ('firebaseBaseUrl', 'https://firebasestorage.googleapis.com/v0/b/tigerhall-f9032.appspot.com/o/');
+INSERT INTO `sys`.`tg_config` (`key`, `value`) VALUES ('TokenSecret', 'my-ultra-secure-json-web-token-string');
+INSERT INTO `sys`.`tg_config` (`key`, `value`) VALUES ('TokenMaxAge', '0');
+INSERT INTO `sys`.`tg_config` (`key`, `value`) VALUES ('EmailFrom', 'tigersighting@tigerhill.com');
+INSERT INTO `sys`.`tg_config` (`key`, `value`) VALUES ('TokenExpiresIn', '60000');
+```
+
+Please update your firebaseBaseUrl and  bucket(firebase)
 
 }
 
