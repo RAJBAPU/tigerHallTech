@@ -209,6 +209,7 @@ CREATE TABLE `tg_tiger_sighting` (
   `lastSeen` datetime NULL DEFAULT NULL,
   `longitude` float  NULL DEFAULT NULL,
   `latitude`  float  NULL DEFAULT NULL,
+  `sightedByUser` int NULL DEFAULT NULL,
   `createdOn` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatedOn` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
