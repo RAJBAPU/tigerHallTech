@@ -134,6 +134,7 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 	tigerImage.LastSteenTimeStamp = request.LastSteenTimeStamp
 	tigerImage.Latitude = request.LastSteenCoordinates.Latitude
 	tigerImage.Longitude = request.LastSteenCoordinates.Longitude
+	tigerImage.SightedByUser = user.Id
 	_, err = models.AddTgTigerImages(tigerImage)
 	if err != nil {
 		fmt.Println(" error in AddTgTigerImages: ", err)
