@@ -15,6 +15,7 @@ type TgTigerImages struct {
 	Longitude          float64   `orm:"column(longitude);null"`
 	Latitude           float64   `orm:"column(latitude);null"`
 	Image              string    `orm:"column(image);null"`
+	SightedByUser      int       `orm:"column(sightedByUser);"`
 }
 
 func (t *TgTigerImages) TableName() string {
