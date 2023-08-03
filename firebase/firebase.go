@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
-	models "simpl_pr/model"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -64,8 +63,7 @@ func GetImageFromFirebase(filePath, imageName string) ([]byte, error) {
 
 	return imageBytes, nil
 }
-func UploadToFireBaseAndGetAccessUrl(content []byte, contentType, filepath string) (url string, err error) {
-	configs := models.GetAllConfigs()
+func UploadToFireBaseAndGetAccessUrl(content []byte, contentType, filepath string, configs map[string]string) (url string, err error) {
 	bucket := configs["bucket"]
 	url, err = firebaseUploadWithBucket(content, contentType, filepath, bucket, "")
 	firebaseBaseUrl := configs["firebaseBaseUrl"]
