@@ -6,6 +6,8 @@ import (
 	"simpl_pr/middleware"
 	"simpl_pr/service"
 
+	"simpl_pr/persistence"
+
 	"github.com/astaxie/beego/orm"
 	_ "github.com/astaxie/beego/orm" // Import Beego ORM package
 	"github.com/gin-gonic/gin"
@@ -20,16 +22,37 @@ func main() {
 	go service.ProcessMessages()
 	router := gin.Default()
 
-	router.POST("/signup", handler.SignupPage)
-	router.GET("/verifyemail/:verificationCode", handler.VerifyEmail)
-	router.POST("/login", handler.SignInUser)
-	
-	router.GET("/me", middleware.DeserializeUser(), handler.GetUserDetails)
+	dbRunMode := "mysql"
+	tgConfig := persistence.NewTgConfigPersistence(dbRunMode)
+	tgUser := persistence.NewTgUsergPersistence(dbRunMode)
+	tgTigerDetails := persistence.NewTgTigerDetailsPersistence(dbRunMode)
+	tgTigerImages := persistence.NewTgTigerImagesPersistence(dbRunMode)
+	tgDependency := &service.Tiger{
+		Configs:      tgConfig,
+		User:         tgUser,
+		TigerDetails: tgTigerDetails,
+		TigerImages:  tgTigerImages,
+	}
 
-	router.POST("/tigers", middleware.DeserializeUser(), handler.PostTigerDetails)
-	router.GET("/tigers", middleware.DeserializeUser(), handler.GetAllTigers)
-	router.POST("/tigers/sightings", middleware.DeserializeUser(), handler.PostSightingDetails)
-	router.GET("/tigers/sightings", middleware.DeserializeUser(), handler.GetSightingDetails)
+	tgUserDependency := &service.User{
+		Configs: tgConfig,
+		User:    tgUser,
+	}
+
+	customer := &middleware.CustomerSvc{
+		User:    tgUser,
+		Configs: tgConfig,
+	}
+
+	router.POST("/signup", handler.SignupPage(tgUserDependency))
+	router.GET("/verifyemail/:verificationCode", handler.VerifyEmail(tgUserDependency))
+	router.POST("/login", handler.SignInUser(tgUserDependency))
+	router.GET("/me", middleware.DeserializeUser(customer), handler.GetUserDetails(tgUserDependency))
+
+	router.POST("/tigers", middleware.DeserializeUser(customer), handler.PostTigerDetails(tgDependency))
+	router.GET("/tigers", middleware.DeserializeUser(customer), handler.GetAllTigers(tgDependency))
+	router.POST("/tigers/sightings", middleware.DeserializeUser(customer), handler.PostSightingDetails(tgDependency))
+	router.GET("/tigers/sightings", middleware.DeserializeUser(customer), handler.GetSightingDetails(tgDependency))
 
 	router.Run("localhost:8080")
 }
