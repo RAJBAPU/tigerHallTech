@@ -3,17 +3,17 @@ package service
 import (
 	"errors"
 	"fmt"
-	models "simpl_pr/model"
 	util "simpl_pr/utils"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 )
 
 // [...] SignIn User
-func SignInUser(payload SignInInput) (token string, err error) {
+func (tg *User) SignInUser(payload SignInInput, ctx *gin.Context) (token string, err error) {
 	functionName := "service.VerifyEmail"
-	user, err := models.GetUserByEmail(payload.Email)
+	user, err := tg.User.GetUserByEmail(payload.Email)
 	if err != nil {
 		fmt.Println(functionName, "Error in GetUserByEmail: ", err)
 		return
@@ -28,7 +28,7 @@ func SignInUser(payload SignInInput) (token string, err error) {
 		return "", errors.New("invalid email or Password")
 	}
 
-	configs := models.GetAllConfigs()
+	configs := tg.Configs.GetAllConfigs()
 	expiersIn := cast.ToInt(configs["TokenExpiresIn"])
 	tokeSecret := configs["TokenSecret"]
 	expiers := time.Duration(expiersIn) * time.Minute
@@ -39,5 +39,6 @@ func SignInUser(payload SignInInput) (token string, err error) {
 		return
 	}
 
+	ctx.SetCookie("token", token, cast.ToInt(configs["TokenExpiresIn"]), "/", "localhost", false, true)
 	return
 }

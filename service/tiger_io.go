@@ -58,4 +58,5 @@ type NotificationMessage struct {
 	Latitude           float64
 	Longitude          float64
 	LastSteenTimeStamp time.Time
+	EmailFrom          string
 }

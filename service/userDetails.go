@@ -4,9 +4,9 @@ import (
 	models "simpl_pr/model"
 )
 
-func GetUserDetails(currentUser *models.TgUser) (userResponse *UserResponse, err error) {
+func (tg *User) GetUserDetails(currentUser *models.TgUser) (userResponse *UserResponse, err error) {
 
-	useDetails, err := models.GetYpUserById(currentUser.Id)
+	useDetails, err := tg.User.GetYpUserById(currentUser.Id)
 	if err != nil {
 		return
 	}

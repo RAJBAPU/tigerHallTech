@@ -10,6 +10,7 @@ import (
 	"math"
 	"simpl_pr/firebase"
 	models "simpl_pr/model"
+	"simpl_pr/persistence"
 	util "simpl_pr/utils"
 	"time"
 
@@ -22,11 +23,18 @@ import (
 
 var messageChan = make(chan NotificationMessage, 100) // Buffered channel to handle messages
 
-func PostTigerDetails(payload TigerDetails) (err error) {
+type Tiger struct {
+	Configs      persistence.TgConfigPersistence
+	User         persistence.TgUserPersistence
+	TigerDetails persistence.TgTigerDetailsPersistence
+	TigerImages  persistence.TgTigerImagesPersistence
+}
+
+func (tg *Tiger) PostTigerDetails(payload TigerDetails) (err error) {
 
 	dobString := payload.Dob.Format("2006-01-02")
 
-	tigerDetails, err := models.GetTgTigerDetails(payload.Name, dobString)
+	tigerDetails, err := tg.TigerDetails.GetTgTigerDetails(payload.Name, dobString)
 	if (err != nil && err != orm.ErrNoRows) || tigerDetails != nil {
 		fmt.Println("Error in GetTgTigerDetails: ", err)
 		return errors.New("tiger already present in database")
@@ -38,7 +46,7 @@ func PostTigerDetails(payload TigerDetails) (err error) {
 	tigerDetails.Longitude = payload.LastSteenCoordinates.Longitude
 	tigerDetails.Latitude = payload.LastSteenCoordinates.Latitude
 
-	_, err = models.AddTgTigerDetails(tigerDetails)
+	_, err = tg.TigerDetails.AddTgTigerDetails(tigerDetails)
 	if err != nil {
 		fmt.Println("Error in AddTgTigerDetails: ", err)
 		return
@@ -46,9 +54,9 @@ func PostTigerDetails(payload TigerDetails) (err error) {
 	return
 }
 
-func GetAllTigers(page int, pageSize int) (response *TigerDetailsWithPaginationResponse, err error) {
+func (tg *Tiger) GetAllTigers(page int, pageSize int) (response *TigerDetailsWithPaginationResponse, err error) {
 
-	total, err := models.GetCountOfTigers()
+	total, err := tg.TigerDetails.GetCountOfTigers()
 	if err != nil {
 		fmt.Println("Error in GetCountOfTigers: ", err)
 		return
@@ -58,7 +66,7 @@ func GetAllTigers(page int, pageSize int) (response *TigerDetailsWithPaginationR
 	offset := (page - 1) * pageSize
 	limit := pageSize
 
-	tigers, err := models.GetAllTigers(offset, limit)
+	tigers, err := tg.TigerDetails.GetAllTigers(offset, limit)
 	if err != nil {
 		fmt.Println("Error in GetAllTigers: ", err)
 		return
@@ -83,8 +91,8 @@ func GetAllTigers(page int, pageSize int) (response *TigerDetailsWithPaginationR
 
 }
 
-func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode int, err error) {
-	tigerDetails, err := models.GetTgTigerDetailsById(request.TigerId)
+func (tg *Tiger) PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode int, err error) {
+	tigerDetails, err := tg.TigerDetails.GetTgTigerDetailsById(request.TigerId)
 	if err != nil {
 		fmt.Println("Error in GetTgTigerDetailsById: ", err)
 		return
@@ -112,8 +120,9 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 	filename := firebase.GenerateUUID()
 
 	filePath := cast.ToString(tigerDetails.Id) + "/" + "tigerImage" + "/" + filename
+	configs := tg.Configs.GetAllConfigs()
 
-	tigerImageUrl, err := firebase.UploadToFireBaseAndGetAccessUrl(resizedImageData, "image/jpg", filePath)
+	tigerImageUrl, err := firebase.UploadToFireBaseAndGetAccessUrl(resizedImageData, "image/jpg", filePath, configs)
 	if err != nil {
 		fmt.Println("Error in UploadToFireBaseAndGetAccessUrl: ", err)
 		return
@@ -122,7 +131,7 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 	tigerDetails.LastSteenTimeStamp = request.LastSteenTimeStamp
 	tigerDetails.Latitude = request.LastSteenCoordinates.Latitude
 	tigerDetails.Longitude = request.LastSteenCoordinates.Longitude
-	err = models.UpdateTgTiger(tigerDetails, nil, "lastSteenTimeStamp", "latitude", "longitude")
+	err = tg.TigerDetails.UpdateTgTiger(tigerDetails, nil, "lastSteenTimeStamp", "latitude", "longitude")
 	if err != nil {
 		fmt.Println(" error in UpdateTgTiger ", err)
 		return
@@ -135,13 +144,13 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 	tigerImage.Latitude = request.LastSteenCoordinates.Latitude
 	tigerImage.Longitude = request.LastSteenCoordinates.Longitude
 	tigerImage.SightedByUser = user.Id
-	_, err = models.AddTgTigerImages(tigerImage)
+	_, err = tg.TigerImages.AddTgTigerImages(tigerImage)
 	if err != nil {
 		fmt.Println(" error in AddTgTigerImages: ", err)
 		return
 	}
 
-	user, err = models.GetYpUserById(user.Id)
+	user, err = tg.User.GetYpUserById(user.Id)
 	if err != nil {
 		fmt.Println(" error in GetYpUserById: ", err)
 		return
@@ -151,6 +160,7 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 	if strings.Contains(firstName, " ") {
 		firstName = strings.Split(firstName, " ")[1]
 	}
+
 	message := NotificationMessage{
 		Name:               firstName,
 		Email:              user.Email,
@@ -158,6 +168,7 @@ func PostSightingDetails(request TigerDetails, user *models.TgUser) (errorCode i
 		Latitude:           tigerDetails.Latitude,
 		Longitude:          tigerDetails.Longitude,
 		LastSteenTimeStamp: tigerImage.LastSteenTimeStamp,
+		EmailFrom:          configs["EmailFrom"],
 	}
 
 	messageChan <- message
@@ -189,8 +200,8 @@ func degreesToRadians(deg float64) float64 {
 	return deg * (math.Pi / 180)
 }
 
-func GetSightingDetails(tigerId int, page int, pageSize int) (response *TigerSightingResponse, err error) {
-	total, err := models.GetCountOfTigerSightings(tigerId)
+func (tg *Tiger) GetSightingDetails(tigerId int, page int, pageSize int) (response *TigerSightingResponse, err error) {
+	total, err := tg.TigerImages.GetCountOfTigerSightings(tigerId)
 	if err != nil {
 		fmt.Println("Error in GetCountOfTigerSightings: ", err)
 		return
@@ -200,12 +211,12 @@ func GetSightingDetails(tigerId int, page int, pageSize int) (response *TigerSig
 	offset := (page - 1) * pageSize
 	limit := pageSize
 
-	sightingDetails, err := models.GetAllTigerSightings(tigerId, offset, limit)
+	sightingDetails, err := tg.TigerImages.GetAllTigerSightings(tigerId, offset, limit)
 	if err != nil {
 		fmt.Println("Error in GetAllTigerSightings: ", err)
 		return
 	}
-	configs := models.GetAllConfigs()
+	configs := tg.Configs.GetAllConfigs()
 	baseUrl := configs["firebaseBaseUrl"]
 	sightingResponse := &SightingDetails{}
 	var tigerDetailsSlice []SightingDetails
@@ -241,9 +252,7 @@ func sendNotificationEmail(message NotificationMessage) {
 		Text:    "Tiger named" + message.TigerName + "was spotted at " + time,
 	}
 
-	configs := models.GetAllConfigs()
-	emailFrom := configs["EmailFrom"]
-	err := util.SendEmail(emailFrom, message.Email, &emailData)
+	err := util.SendEmail(message.EmailFrom, message.Email, &emailData)
 	if err != nil {
 		fmt.Println("Unable to send email: ", err)
 	}

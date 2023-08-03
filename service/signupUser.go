@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	models "simpl_pr/model"
+	"simpl_pr/persistence"
 	util "simpl_pr/utils"
 
 	"github.com/astaxie/beego/orm"
@@ -21,8 +22,13 @@ func NewAuthController(DB *gorm.DB) AuthController {
 	return AuthController{DB}
 }
 
+type User struct {
+	Configs persistence.TgConfigPersistence
+	User    persistence.TgUserPersistence
+}
+
 // [...] SignUp User
-func SignUpUser(payload SignUpInput) (errCode int, err error) {
+func (tg *User) SignUpUser(payload SignUpInput) (errCode int, err error) {
 	functionName := "serive.SignUpUser"
 	valid := util.IsValidEmail(payload.Email)
 	if !valid {
@@ -31,7 +37,7 @@ func SignUpUser(payload SignUpInput) (errCode int, err error) {
 		return
 	}
 
-	tgUser, err := models.GetUserByEmail(payload.Email)
+	tgUser, err := tg.User.GetUserByEmail(payload.Email)
 	if (err != nil && err != orm.ErrNoRows) || tgUser != nil {
 		fmt.Println(functionName, "email Already Exist", err)
 		errCode = 453
@@ -56,7 +62,7 @@ func SignUpUser(payload SignUpInput) (errCode int, err error) {
 		Password: hashedPassword,
 	}
 
-	_, err = models.AddTgUser(&newUser)
+	_, err = tg.User.AddTgUser(&newUser)
 	if err != nil {
 		fmt.Println(functionName, "Error in AddTgUser: ", err)
 		return
@@ -69,7 +75,7 @@ func SignUpUser(payload SignUpInput) (errCode int, err error) {
 
 	// Update User in Database
 	newUser.VerificationCode = verification_code
-	err = models.UpdateTgUser(&newUser, nil, "SignUpUser", "verificationCode")
+	err = tg.User.UpdateTgUser(&newUser, nil, "SignUpUser", "verificationCode")
 	if err != nil {
 		fmt.Println(" error UpdateTgUser: ", err)
 		return
@@ -88,7 +94,7 @@ func SignUpUser(payload SignUpInput) (errCode int, err error) {
 		Text:      "Enter the below code to verify your account: " + code,
 	}
 
-	configs := models.GetAllConfigs()
+	configs := tg.Configs.GetAllConfigs()
 	emailFrom := configs["EmailFrom"]
 
 	err = util.SendEmail(emailFrom, newUser.Email, &emailData)
