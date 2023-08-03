@@ -26,12 +26,14 @@ func init() {
 	orm.RegisterModel(new(TgTigerImages))
 }
 
-func GetTgTigerImagesByI(id int) (v *TgTigerImages, err error) {
+type BeegoTgTigerImages struct{}
+
+func (tg *BeegoTgTigerImages) GetTgTigerImagesByI(id int) (v *TgTigerImages, err error) {
 	o := orm.NewOrm()
-	return GetTgTigerImagesByIdWithORM(id, o)
+	return tg.GetTgTigerImagesByIdWithORM(id, o)
 }
 
-func GetTgTigerImagesByIdWithORM(id int, o orm.Ormer) (v *TgTigerImages, err error) {
+func (tg *BeegoTgTigerImages) GetTgTigerImagesByIdWithORM(id int, o orm.Ormer) (v *TgTigerImages, err error) {
 	v = &TgTigerImages{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
@@ -40,18 +42,18 @@ func GetTgTigerImagesByIdWithORM(id int, o orm.Ormer) (v *TgTigerImages, err err
 	return nil, err
 }
 
-func AddTgTigerImages(m *TgTigerImages) (id int64, err error) {
+func (tg *BeegoTgTigerImages) AddTgTigerImages(m *TgTigerImages) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-func GetAllTigerSightings(tigerId int, offset int, limit int) (tigers []*TgTigerImages, err error) {
+func (tg *BeegoTgTigerImages) GetAllTigerSightings(tigerId int, offset int, limit int) (tigers []*TgTigerImages, err error) {
 	o := orm.NewOrm()
 	//v = []*TgTigerImages{}
 
 	//	_, err = o.QueryTable(new(TgTigerDetails)).Filter("tigerId", tigerId).OrderBy("-lastSteen").All(&v)
-	query := "SELECT * FROM tg_tiger_images where tigerId = ? ORDER BY lastSeen DESC LIMIT ?, ?;"
+	query := "SELECT * FROM tg_tiger_sighting where tigerId = ? ORDER BY lastSeen DESC LIMIT ?, ?;"
 	_, err = o.Raw(query, tigerId, offset, limit).QueryRows(&tigers)
 	if err != nil {
 		return nil, err
@@ -60,7 +62,7 @@ func GetAllTigerSightings(tigerId int, offset int, limit int) (tigers []*TgTiger
 	return
 }
 
-func GetCountOfTigerSightings(tigerId int) (total int, err error) {
+func (tg *BeegoTgTigerImages) GetCountOfTigerSightings(tigerId int) (total int, err error) {
 	o := orm.NewOrm()
 
 	count, err := o.QueryTable(new(TgTigerImages)).Filter("tigerId", tigerId).Count()

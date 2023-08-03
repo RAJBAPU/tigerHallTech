@@ -21,7 +21,9 @@ func init() {
 	orm.RegisterModel(new(TgConfig))
 }
 
-func GetAllTgConfig() (v []TgConfig, err error) {
+type BeegoTgConfig struct{}
+
+func (i *BeegoTgConfig) GetAllTgConfig() (v []TgConfig, err error) {
 	o := orm.NewOrm()
 	v = []TgConfig{}
 
@@ -34,12 +36,12 @@ func GetAllTgConfig() (v []TgConfig, err error) {
 	return
 }
 
-func GetAllConfigs() map[string]string {
+func (i *BeegoTgConfig) GetAllConfigs() map[string]string {
 
 	var configs []TgConfig
 	var err error
 
-	configs, err = GetAllTgConfig()
+	configs, err = i.GetAllTgConfig()
 	_configs := make((map[string]string))
 	if err != nil {
 		return _configs

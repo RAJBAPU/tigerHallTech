@@ -23,14 +23,16 @@ func init() {
 	orm.RegisterModel(new(TgUser))
 }
 
+type BeegoTgUser struct{}
+
 // GetYpUserById retrieves YpUser by Id. Returns error if
 // Id doesn't exist
-func GetYpUserById(id int) (v *TgUser, err error) {
+func (tg *BeegoTgUser) GetYpUserById(id int) (v *TgUser, err error) {
 	o := orm.NewOrm()
-	return GetYpUserByIdWithORM(id, o)
+	return tg.GetYpUserByIdWithORM(id, o)
 }
 
-func GetYpUserByIdWithORM(id int, o orm.Ormer) (v *TgUser, err error) {
+func (tg *BeegoTgUser) GetYpUserByIdWithORM(id int, o orm.Ormer) (v *TgUser, err error) {
 	v = &TgUser{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
@@ -39,29 +41,29 @@ func GetYpUserByIdWithORM(id int, o orm.Ormer) (v *TgUser, err error) {
 	return nil, err
 }
 
-func AddTgUser(m *TgUser) (id int64, err error) {
+func (tg *BeegoTgUser) AddTgUser(m *TgUser) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
-	return
+	return id, err
 }
 
-func UpdateTgUser(data *TgUser, o orm.Ormer, updatedBy string, columns ...string) (err error) {
+func (tg *BeegoTgUser) UpdateTgUser(data *TgUser, o orm.Ormer, updatedBy string, columns ...string) (err error) {
 	if o == nil {
 		o = orm.NewOrm()
 	}
-	err = updateRowByColumns(o, data, updatedBy, columns...)
+	err = tg.updateRowByColumns(o, data, updatedBy, columns...)
 	if err != nil {
 		fmt.Println("Error updating tg_user ", err)
 	}
 	return
 }
 
-func updateRowByColumns(o orm.Ormer, data *TgUser, updatedBy string, columns ...string) (err error) {
+func (tg *BeegoTgUser) updateRowByColumns(o orm.Ormer, data *TgUser, updatedBy string, columns ...string) (err error) {
 	_, err = o.Update(data, columns...)
 	return
 }
 
-func GetUserByVerificationCode(verificationCode string) (v *TgUser, err error) {
+func (tg *BeegoTgUser) GetUserByVerificationCode(verificationCode string) (v *TgUser, err error) {
 
 	o := orm.NewOrm()
 	v = &TgUser{}
@@ -74,7 +76,7 @@ func GetUserByVerificationCode(verificationCode string) (v *TgUser, err error) {
 	return
 }
 
-func GetUserByEmail(email string) (v *TgUser, err error) {
+func (tg *BeegoTgUser) GetUserByEmail(email string) (v *TgUser, err error) {
 
 	o := orm.NewOrm()
 	v = &TgUser{}

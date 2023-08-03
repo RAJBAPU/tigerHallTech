@@ -26,12 +26,14 @@ func init() {
 	orm.RegisterModel(new(TgTigerDetails))
 }
 
-func GetTgTigerDetailsById(id int) (v *TgTigerDetails, err error) {
+type BeegoTgTigerDetails struct{}
+
+func (t *BeegoTgTigerDetails) GetTgTigerDetailsById(id int) (v *TgTigerDetails, err error) {
 	o := orm.NewOrm()
-	return GetTgTigerDetailsByIdWithORM(id, o)
+	return t.GetTgTigerDetailsByIdWithORM(id, o)
 }
 
-func GetTgTigerDetailsByIdWithORM(id int, o orm.Ormer) (v *TgTigerDetails, err error) {
+func (t *BeegoTgTigerDetails) GetTgTigerDetailsByIdWithORM(id int, o orm.Ormer) (v *TgTigerDetails, err error) {
 	v = &TgTigerDetails{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
@@ -40,13 +42,13 @@ func GetTgTigerDetailsByIdWithORM(id int, o orm.Ormer) (v *TgTigerDetails, err e
 	return nil, err
 }
 
-func AddTgTigerDetails(m *TgTigerDetails) (id int64, err error) {
+func (t *BeegoTgTigerDetails) AddTgTigerDetails(m *TgTigerDetails) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-func GetTgTigerDetails(name string, dob string) (v *TgTigerDetails, err error) {
+func (t *BeegoTgTigerDetails) GetTgTigerDetails(name string, dob string) (v *TgTigerDetails, err error) {
 
 	o := orm.NewOrm()
 	v = &TgTigerDetails{}
@@ -62,7 +64,7 @@ func GetTgTigerDetails(name string, dob string) (v *TgTigerDetails, err error) {
 	return
 }
 
-func GetAllAliveTigers() (v []*TgTigerDetails, err error) {
+func (t *BeegoTgTigerDetails) GetAllAliveTigers() (v []*TgTigerDetails, err error) {
 	o := orm.NewOrm()
 	v = []*TgTigerDetails{}
 
@@ -75,7 +77,7 @@ func GetAllAliveTigers() (v []*TgTigerDetails, err error) {
 	return
 }
 
-func GetAllDeadTigers() (v []*TgTigerDetails, err error) {
+func (t *BeegoTgTigerDetails) GetAllDeadTigers() (v []*TgTigerDetails, err error) {
 	o := orm.NewOrm()
 	v = []*TgTigerDetails{}
 
@@ -88,7 +90,7 @@ func GetAllDeadTigers() (v []*TgTigerDetails, err error) {
 	return
 }
 
-func GetAllTigers(offset int, limit int) (tigers []*TgTigerDetails, err error) {
+func (t *BeegoTgTigerDetails) GetAllTigers(offset int, limit int) (tigers []*TgTigerDetails, err error) {
 	o := orm.NewOrm()
 
 	query := "SELECT * FROM tg_tiger_details ORDER BY lastSeen DESC LIMIT ?, ?"
@@ -101,7 +103,7 @@ func GetAllTigers(offset int, limit int) (tigers []*TgTigerDetails, err error) {
 	return
 }
 
-func UpdateTgTiger(data *TgTigerDetails, o orm.Ormer, updatedBy string, columns ...string) (err error) {
+func (t *BeegoTgTigerDetails) UpdateTgTiger(data *TgTigerDetails, o orm.Ormer, updatedBy string, columns ...string) (err error) {
 	if o == nil {
 		o = orm.NewOrm()
 	}
@@ -112,7 +114,7 @@ func UpdateTgTiger(data *TgTigerDetails, o orm.Ormer, updatedBy string, columns 
 	return
 }
 
-func GetCountOfTigers() (total int, err error) {
+func (t *BeegoTgTigerDetails) GetCountOfTigers() (total int, err error) {
 	o := orm.NewOrm()
 
 	count, err := o.QueryTable(new(TgTigerDetails)).Count()
