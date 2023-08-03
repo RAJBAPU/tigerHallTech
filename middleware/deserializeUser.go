@@ -5,14 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	models "simpl_pr/model"
 	util "simpl_pr/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 )
 
-func DeserializeUser() gin.HandlerFunc {
+func DeserializeUser(customer *CustomerSvc) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var token string
 		cookie, err := ctx.Cookie("token")
@@ -30,9 +29,8 @@ func DeserializeUser() gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
 			return
 		}
-
-		//config, _ := initializers.LoadConfig(".")
-		configs := models.GetAllConfigs()
+		
+		configs := customer.GetConfigs()
 		tokeSecret := configs["TokenSecret"]
 		sub, err := util.ValidateToken(token, tokeSecret)
 		if err != nil {
@@ -40,7 +38,7 @@ func DeserializeUser() gin.HandlerFunc {
 			return
 		}
 
-		user, err := models.GetYpUserById(cast.ToInt(fmt.Sprint(sub)))
+		user, err := customer.GetUser(cast.ToInt(fmt.Sprint(sub)))
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user belonging to this token no logger exists"})
 			return
