@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"simpl_pr/handler"
 	"simpl_pr/middleware"
@@ -15,6 +16,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting")
 	err := registerDB()
 	if err != nil {
 		log.Fatalf("<MysqlDB> Error in kbyp  db registration: %v", err)
